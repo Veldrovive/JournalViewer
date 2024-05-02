@@ -1,0 +1,12 @@
+appId: com.aidandevelops.journalprocessor
+productName: Journal Processor
+copyright: Copyright © 2024 Aidan Dempster
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null

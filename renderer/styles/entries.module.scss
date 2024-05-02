@@ -1,0 +1,51 @@
+.main-grid {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+
+    .main-grid__item {
+        position: relative;
+        height: 100%;
+
+        &.clock-container {
+            padding: 0;
+        }
+
+        &.entries-container {
+            // background-color: white;
+            padding-top: 0;
+            padding-right: 0;
+            padding-bottom: 0;
+
+            .entries-drag-indicator {
+                height: 100%;
+                width: 13px;
+                cursor: col-resize;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                .drag-handle {
+                    height: 50px;
+                    width: 3px;
+                    background-color: #ccc;
+                    border-radius: 3px;
+                }
+            }
+        }
+
+        &.map-container {
+            // background-color: red;
+            padding: 0;
+
+            .date-picker-positioner {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                z-index: 1;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    }
+}
