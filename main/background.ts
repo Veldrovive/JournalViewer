@@ -4,6 +4,11 @@ import serve from 'electron-serve'
 import { createWindow } from './helpers'
 
 import bonjour from 'bonjour'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+process.env.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 
 const isProd = process.env.NODE_ENV === 'production'
 const devServerHost = 'localhost'
@@ -78,6 +83,10 @@ app.on('window-all-closed', () => {
 ipcMain.on('message', async (event, arg) => {
     console.log('Got message', arg)
   event.reply('message', `${arg} World!`)
+})
+
+ipcMain.on('google-auth', async (message_event, arg) => {
+    message_event.reply('google-auth', process.env.GOOGLE_API_KEY)
 })
 
 ipcMain.on('fitbit-auth', async (message_event, arg) => {

@@ -47,6 +47,15 @@ export default function EntriesPage() {
         splitLocationsDistanceThreshold: 5000,
     })
 
+    const [googleApiKey, setGoogleApiKey] = useState<string | null>(null)
+
+    useEffect(() => {
+        window.ipc.on('google-auth', (key: string) => {
+            setGoogleApiKey(key)
+        })
+        window.ipc.send('google-auth', {})
+    }, [setGoogleApiKey])
+
     // useEffect(() => {
     //     console.log("Input Handler Info Changed", inputHandlerInfo)
     // }, [inputHandlerInfo])
@@ -364,17 +373,20 @@ export default function EntriesPage() {
                                 <Button onClick={openSettings} variant="subtle" ml={5}><IconSettings /></Button>
                             </div>
                         </div>
-                        <HerosJourneyMap
-                            splitLocations={splitLocations}
-                            geotaggedEntries={geotaggedEntries}
-                            currentLocation={currentLocation}
+                        {
+                            googleApiKey && <HerosJourneyMap
+                                googleApiKey={googleApiKey}
+                                splitLocations={splitLocations}
+                                geotaggedEntries={geotaggedEntries}
+                                currentLocation={currentLocation}
 
-                            onGeotaggedEntryClick={onGeotaggedEntryClick}
-                            onGeolocationClick={onGeolocationClick}
-                            onAreaSelect={setLocationFilter}
+                                onGeotaggedEntryClick={onGeotaggedEntryClick}
+                                onGeolocationClick={onGeolocationClick}
+                                onAreaSelect={setLocationFilter}
 
-                            ref={mapRef}
-                        ></HerosJourneyMap>
+                                ref={mapRef}
+                            ></HerosJourneyMap>
+                        }
                     </Grid.Col>
                 </Grid>
             </Providers>

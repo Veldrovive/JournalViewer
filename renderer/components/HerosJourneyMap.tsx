@@ -13,6 +13,7 @@ declare module "react" {
     ): (props: P & React.RefAttributes<T>) => React.ReactNode | null
 }
 interface HerosJourneyMapProps {
+    googleApiKey: string
     splitLocations: GeoLocation[][] | null
     geotaggedEntries: GeoLocation[][] | null
     currentLocation: { lat: number; lng: number } | null
@@ -30,6 +31,7 @@ export interface HerosJourneyRef {
 
 export default forwardRef(function HerosJourneyMap(
     {
+        googleApiKey,
         splitLocations,
         geotaggedEntries,
         currentLocation,
@@ -43,9 +45,10 @@ export default forwardRef(function HerosJourneyMap(
     // locationEntries is an array of objects with the properties lat, lng, and component
     //  renders the component as a marker on the map
     const [libraries, setLibraries] = useState<any[]>(["drawing"])
+
     const { isLoaded, loadError } = useJsApiLoader({
         id: "google-map-script",
-        googleMapsApiKey: "AIzaSyDAILVnAsXwT6rIMz9nz9ABlKOm_XoRCsM",
+        googleMapsApiKey: googleApiKey,
         libraries: libraries,
     })
     const [map, setMap] = useState<google.maps.Map | null>(null)
