@@ -277,17 +277,25 @@ export default function EntriesPage() {
             )
         } else if (entriesLoading) {
             return (
-                <div style={{ padding: "8px" }}>
+                <div style={{ padding: "8px", overflow: 'clip', height: '100%' }}>
                     <Skeleton height={50} circle mb="xl" />
                     <Skeleton height={8} radius="xl" />
-                    <Skeleton height={8} mt={6} radius="xl" />
-                    <Skeleton height={8} mt={6} width="70%" radius="xl" />
-                    <Skeleton height={8} mt={20} radius="xl" />
-                    <Skeleton height={8} mt={6} radius="xl" />
-                    <Skeleton height={8} mt={6} width="70%" radius="xl" />
-                    <Skeleton height={8} mt={20} radius="xl" />
-                    <Skeleton height={8} mt={6} radius="xl" />
-                    <Skeleton height={8} mt={6} width="70%" radius="xl" />
+                    {
+                        Array.from({ length: 20 }).map((_, i) => (
+                            <div key={i}>
+                                <Skeleton height={8} mt={6} radius="xl" />
+                                <Skeleton height={8} mt={6} width="70%" radius="xl" />
+                                {
+                                    i % 2 === 0 && <><Skeleton height={8} mt={6} radius="xl" />
+                                    <Skeleton height={8} mt={6} width="70%" radius="xl" /></>
+                                }
+                                {
+                                    i % 3 === 0 && <><Skeleton height={8} mt={6} radius="xl" /></>
+                                }
+                                <Skeleton height={8} mt={20} radius="xl" />
+                            </div>
+                        ))
+                    }
                 </div>
             )
         } else if (!entryListValues || entryListValues!.length === 0) {
