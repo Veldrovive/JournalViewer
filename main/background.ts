@@ -4,11 +4,9 @@ import serve from 'electron-serve'
 import { createWindow } from './helpers'
 
 import bonjour from 'bonjour'
-import dotenv from 'dotenv'
 
-dotenv.config()
-
-process.env.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
+// Load environment variables
+import './env'
 
 const isProd = process.env.NODE_ENV === 'production'
 const devServerHost = 'localhost'

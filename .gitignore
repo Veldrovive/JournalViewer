@@ -5,5 +5,5 @@ app
 dist
 .vscode
 
-.env*
-!.env.example
+env*.ts
+!env*.example.ts
