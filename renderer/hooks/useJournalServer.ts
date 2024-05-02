@@ -22,8 +22,9 @@ export type InputHandlerInfo = {
 export type InputHandlerInfos = Record<string, InputHandlerInfo>
 
 export default function useJournalServer() {
-    const [journalService, setJournalService] = useState<Service>(null)
+    const [journalService, setJournalService] = useState<Service | null>(null)
     const [journalServiceAlive, setJournalServiceAlive] = useState<boolean>(false)
+    const [journalDeviceFound, setJournalDeviceFound] = useState<boolean>(false)
     const [inputHandlerInfo, setInputHandlerInfo] = useState<InputHandlerInfos>(null)
 
     useEffect(() => {
@@ -32,6 +33,11 @@ export default function useJournalServer() {
             return
         }
         window.ipc.on('journal_service', (service: Service) => {
+            if (service) {
+                setJournalDeviceFound(true)
+            } else {
+                setJournalDeviceFound(false)
+            }
             setJournalService(service)
         })
 
@@ -114,5 +120,5 @@ export default function useJournalServer() {
     }
   }, [journalServiceAlive, refreshInputHandlerInfo])
 
-    return { journalServiceBaseUrl, journalServiceIp, journalServicePort, hasJournalService, journalServiceAlive, inputHandlerInfo, refreshInputHandlerInfo }
+    return { journalServiceBaseUrl, journalServiceIp, journalServicePort, hasJournalService, journalServiceAlive, journalDeviceFound, inputHandlerInfo, refreshInputHandlerInfo }
 }

@@ -14,8 +14,22 @@ export default function HomePage() {
     const router = useRouter()
     const { message }: { message?: string } = router.query
 
-    const { journalServiceAlive } = useJournalServer()
+    const { journalServiceAlive, journalDeviceFound } = useJournalServer()
     const [timedOutState, setTimedOutState] = useState('idle')
+    const [currentLoadingState, setCurrentLoadingState] = useState('Looking for Journal Server device...')
+
+    useEffect(() => {
+        // If the device isn't found, then we are 'Looking for Journal Server device...'
+        // If the device is found, but the service isn't alive, then we are 'Connecting to Journal Server...'
+        // If the service is alive, we are 'Loading Journal Server...'
+        if (!journalDeviceFound) {
+            setCurrentLoadingState('Looking for Journal Server device...')
+        } else if (journalDeviceFound && !journalServiceAlive) {
+            setCurrentLoadingState('Connecting to Journal Server...')
+        } else if (journalServiceAlive) {
+            setCurrentLoadingState('Loading Journal Server...')
+        }
+    }, [journalServiceAlive, journalDeviceFound])
 
     useEffect(() => {
         // When the journal service becomes alive, we move to the entries page
@@ -40,15 +54,25 @@ export default function HomePage() {
             return (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", flexDirection: "column" }}>
                     <Loader />
-                    { message && <p>{messageMap[message]}</p> }
+                    { message ? <p>{messageMap[message]}</p> : <p>{currentLoadingState}</p> }
                 </div>
             )
         } else if (timedOutState === 'timed_out') {
             return (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", flexDirection: "column" }}>
                     <Loader />
-                    <p>Journal Server is not responding.</p>
-                    <p>Ensure you are on the same network as the Journal Server.</p>
+                    {
+                        journalDeviceFound ?
+                            <>
+                                <p>Journal device found, but Journal Server is not responding.</p>
+                                <p>Journal Server may have crashed. Try restarting the Journal device.</p>
+                            </>
+                            :
+                            <>
+                                <p>Journal device not found.</p>
+                                <p>Ensure that Journal Device is on and you are on the same WiFi network.</p>
+                            </>
+                    }
                 </div>
             )
         }
