@@ -5,7 +5,7 @@ import { GoogleMap, useJsApiLoader, Polyline, Marker } from "@react-google-maps/
 
 import { GeoLocation } from "../hooks/useProcessedEntries"
 import { ActionIcon } from "@mantine/core"
-import { IconBoxModel2 } from "@tabler/icons-react"
+import { IconBoxModel2, IconSettings } from "@tabler/icons-react"
 
 declare module "react" {
     function forwardRef<T, P = {}>(
@@ -20,6 +20,7 @@ interface HerosJourneyMapProps {
     onGeotaggedEntryClick: (entryGroup: GeoLocation[], entryGroupIndex: number) => void
     onGeolocationClick: (location: GeoLocation) => void
     onAreaSelect: (bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number } | null) => void
+    onConfigButtonPressed: () => void
 }
 
 export interface HerosJourneyRef {
@@ -38,6 +39,7 @@ export default forwardRef(function HerosJourneyMap(
         onGeotaggedEntryClick,
         onGeolocationClick,
         onAreaSelect,
+        onConfigButtonPressed,
     }: HerosJourneyMapProps,
     ref: React.Ref<HerosJourneyRef>
 ) {
@@ -228,8 +230,9 @@ export default forwardRef(function HerosJourneyMap(
     const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null)
     const [selecting, setSelecting] = useState<boolean>(false)
     const [selectionRectangle, setSelectionRectangle] = useState<google.maps.Rectangle | null>(null)
-    const [controlDiv, setControlDiv] = useState<HTMLDivElement | null>(null)
-    const [customControlPortal, setCustomControlPortal] = useState<ReactElement | null>(null)
+    const [selectionControlDiv, setSelectionControlDiv] = useState<HTMLDivElement | null>(null)
+    const [selectionControlPortal, setSelectionControlPortal] = useState<ReactElement | null>(null)
+    const [configControlPortal, setConfigControlPortal] = useState<ReactElement | null>(null)
 
     const onEnterSelectionMode = useCallback(() => {
         console.log("Entering selection mode")
@@ -316,31 +319,50 @@ export default forwardRef(function HerosJourneyMap(
 
     useEffect(() => {
         if (drawingManager) {
-            const control = document.createElement("div")
-            control.style.background = "white"
-            control.style.marginRight = "10px"
-            control.style.boxShadow = "rgba(0, 0, 0, 0.3) 0px 1px 4px -1px"
-            control.style.borderRadius = "2px"
-            control.style.cursor = "pointer"
-            control.style.width = "40px"
-            control.style.height = "40px"
-            control.style.display = "flex"
-            control.style.justifyContent = "center"
-            control.style.alignItems = "center"
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].clear()
+            map.controls[google.maps.ControlPosition.LEFT_BOTTOM].clear()
 
-            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(control)
-            setControlDiv(control)
+            const baseStyle = {
+                background: "white",
+                boxShadow: "rgba(0, 0, 0, 0.3) 0px 1px 4px -1px",
+                borderRadius: "2px",
+                cursor: "pointer",
+                width: "40px",
+                height: "40px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }
+
+            const selectionControl = document.createElement("div")
+            const configControl = document.createElement("div")
+
+            for (const styleKey in baseStyle) {
+                selectionControl.style[styleKey] = baseStyle[styleKey]
+                configControl.style[styleKey] = baseStyle[styleKey]
+            }
+            selectionControl.style.marginRight = "10px"
+            configControl.style.marginLeft = "10px"
+
+            const configPortal = createPortal(<ActionIcon style={{ width: '100%', height: '100%' }} onClick={onConfigButtonPressed}>
+                <IconSettings />
+            </ActionIcon>, configControl)
+            setConfigControlPortal(configPortal)
+
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(selectionControl)
+            map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(configControl)
+            setSelectionControlDiv(selectionControl)
         }
 
         return () => {
             if (drawingManager) {
                 map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].clear()
-                setControlDiv(null)
+                setSelectionControlDiv(null)
             }
         }
-    }, [map, drawingManager, setControlDiv])
+    }, [map, drawingManager, setSelectionControlDiv, onConfigButtonPressed])
 
-    const customControlIcon = useMemo(() => {
+    const selectionControlIcon = useMemo(() => {
         // Clicking this button has a few different optional effects
         // 1. If there is not currently a selection and we are not in selection mode, enter selection mode
         // 2. If there is a selection and we are not in selection mode, remove the selection
@@ -367,11 +389,11 @@ export default forwardRef(function HerosJourneyMap(
     }, [onEnterSelectionMode, selecting, selectionRectangle, onRemoveSelection, onExitSelectionMode])
 
     useEffect(() => {
-        if (controlDiv) {
-            const portal = createPortal(customControlIcon, controlDiv)
-            setCustomControlPortal(portal)
+        if (selectionControlDiv) {
+            const portal = createPortal(selectionControlIcon, selectionControlDiv)
+            setSelectionControlPortal(portal)
         }
-    }, [controlDiv, customControlIcon, setCustomControlPortal])
+    }, [selectionControlDiv, selectionControlIcon, setSelectionControlPortal])
 
 
     return isLoaded ? (
@@ -384,7 +406,8 @@ export default forwardRef(function HerosJourneyMap(
             {polylineMapChildren}
             {geotaggedEntriesMarkers}
             {currentPositionMarker}
-            {customControlPortal}
+            {selectionControlPortal}
+            {configControlPortal}
         </GoogleMap>
     ) : (
         <></>

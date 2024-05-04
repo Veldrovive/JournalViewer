@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useState } from "react"
-import { DatePickerInput } from "@mantine/dates"
+import { useCallback, useEffect, useState, useMemo } from "react"
+import { DatePickerInput, MonthPickerInput, YearPickerInput } from "@mantine/dates"
 
 interface DateRangePickerProps {
     onDateRangeChange: (dateRange: [Date | null, Date | null]) => void
+    pickerType?: PickerType
 }
 
-const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
+export enum PickerType {
+    DAY = "day",
+    MONTH = "month",
+    YEAR = "year",
+}
+
+const DateRangePicker = ({ onDateRangeChange, pickerType = PickerType.DAY }: DateRangePickerProps) => {
     const [value, _setValue] = useState<[Date | null, Date | null]>([null, null])
 
     const setValue = useCallback(
@@ -25,17 +32,54 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
         setValue([startDate, endDate])
     }, [setValue])
 
+    const picker = useMemo(() => {
+        if (pickerType === PickerType.DAY) {
+            return <DatePickerInput
+                type="range"
+                allowSingleDateInRange
+                label="Pick dates range"
+                value={value}
+                onChange={setValue}
+                // mx="auto"
+                maw={400}
+            />
+        } else if (pickerType === PickerType.MONTH) {
+            return <MonthPickerInput
+                type="range"
+                allowSingleDateInRange
+                label="Pick dates range"
+                value={value}
+                onChange={setValue}
+                // mx="auto"
+                maw={400}
+            />
+        } else if (pickerType === PickerType.YEAR) {
+            return <YearPickerInput
+                type="range"
+                allowSingleDateInRange
+                label="Pick dates range"
+                value={value}
+                onChange={setValue}
+                // mx="auto"
+                maw={400}
+            />
+        } else {
+            throw new Error("Invalid picker type")
+        }
+    }, [pickerType, value, setValue])
+
     return (
         // <DatePicker type="range" allowSingleDateInRange value={value} onChange={setValue} />
-        <DatePickerInput
-            type="range"
-            allowSingleDateInRange
-            label="Pick dates range"
-            value={value}
-            onChange={setValue}
-            // mx="auto"
-            maw={400}
-        />
+        // <DatePickerInput
+        //     type="range"
+        //     allowSingleDateInRange
+        //     label="Pick dates range"
+        //     value={value}
+        //     onChange={setValue}
+        //     // mx="auto"
+        //     maw={400}
+        // />
+        picker
     )
 }
 

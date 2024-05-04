@@ -3,11 +3,11 @@ import Head from 'next/head'
 
 import { useHotkeys, useDisclosure } from "@mantine/hooks"
 import { useSearchParams } from 'next/navigation'
-import { Flex, Grid, Skeleton, Paper, Button, Modal } from "@mantine/core"
+import { Flex, Grid, Skeleton, Paper, Button, Modal, Group } from "@mantine/core"
 import { IconSettings } from '@tabler/icons-react';
 
 import HerosJourneyMap, { HerosJourneyRef } from "../components/HerosJourneyMap"
-import DateRangePicker from "../components/DateRangePicker"
+import DateRangePicker, { PickerType } from "../components/DateRangePicker"
 import EntriesList, { ScrollElementValue, EntriesListRef } from "../components/EntriesList"
 import Clock from "../components/Clock"
 import Providers from "../components/Providers"
@@ -325,6 +325,8 @@ export default function EntriesPage() {
 
     const [settingsOpen, { open: openSettings, close: closeSettings }] = useDisclosure(false)
 
+    const [datePickerType, setDatePickerType] = useState<PickerType>(PickerType.DAY)
+
     return (
         <>
             <Head>
@@ -372,13 +374,18 @@ export default function EntriesPage() {
                                     borderRadius: "10px",
                                     minWidth: "50%",
                                     display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "flex-end",
+                                    flexDirection: "column",
+                                    alignItems: "center",
                                     justifyContent: "space-between",
+                                    pointerEvents: "auto",
                                 }}
                             >
-                                <DateRangePicker onDateRangeChange={onDateRangeChange} />
-                                <Button onClick={openSettings} variant="subtle" ml={5}><IconSettings /></Button>
+                                <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} />
+                                <Button.Group>
+                                    <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
+                                    <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
+                                    <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
+                                </Button.Group>
                             </div>
                         </div>
                         {
@@ -391,6 +398,7 @@ export default function EntriesPage() {
                                 onGeotaggedEntryClick={onGeotaggedEntryClick}
                                 onGeolocationClick={onGeolocationClick}
                                 onAreaSelect={setLocationFilter}
+                                onConfigButtonPressed={openSettings}
 
                                 ref={mapRef}
                             ></HerosJourneyMap>
