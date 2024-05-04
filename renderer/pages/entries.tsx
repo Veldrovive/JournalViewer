@@ -36,8 +36,10 @@ export default function EntriesPage() {
     const {
         setStartTime,
         setEndTime,
+        startTime,
+        endTime,
         setEntryTypeWhitelist,
-        setLocationFilter,
+        setLocationFilter: _setLocationFilter,
         entries,
         error: entryFetchError,
         loading: entriesLoading,
@@ -91,6 +93,20 @@ export default function EntriesPage() {
             const endTime = parseInt(endTimeQueryParam)
             setStartTime(startTime)
             setEndTime(endTime)
+        }
+        if (!startTimeQueryParam) {
+            // Then we set the start time to be the start of a week ago
+            const startDate = new Date()
+            startDate.setHours(0, 0, 0, 0)
+            startDate.setDate(startDate.getDate() - 6)
+            setStartTime(startDate.getTime())
+        }
+        if (!endTimeQueryParam) {
+            // Then we set the end time to be the end of today
+            const endDate = new Date()
+            endDate.setHours(0, 0, 0, 0)
+            endDate.setDate(endDate.getDate())
+            setEndTime(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)
         }
     }, [startTimeQueryParam, endTimeQueryParam])
 
@@ -147,6 +163,23 @@ export default function EntriesPage() {
         },
         [setStartTime, setEndTime]
     )
+
+    const setLocationFilter = useCallback((bounds) => {
+        console.log("Setting location filter", bounds)
+        if (!bounds) {
+            // If the current end time - start time is more than 10 days, we reset it to the current day
+            // This is to prevent the user from accidentally selecting a huge date range without any other filter
+            console.log("Checking date range", endTime, startTime, endTime - startTime, 10 * 24 * 60 * 60 * 1000, (endTime - startTime) - 10 * 24 * 60 * 60 * 1000)
+            if (endTime - startTime > 10 * 24 * 60 * 60 * 1000) {
+                const startDate = new Date()
+                startDate.setHours(0, 0, 0, 0)
+                const endDate = new Date()
+                endDate.setHours(0, 0, 0, 0)
+                onDateRangeChange([startDate, endDate])
+            }
+        }
+        _setLocationFilter(bounds)
+    }, [_setLocationFilter, startTime, endTime, onDateRangeChange])
 
     const entryListValues = useMemo(() => {
         const entries: (ScrollElementValue<ScrollElementMetadata> | null)[] = []
@@ -380,7 +413,7 @@ export default function EntriesPage() {
                                     pointerEvents: "auto",
                                 }}
                             >
-                                <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} />
+                                <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} startTime={startTime} endTime={endTime} />
                                 <Button.Group>
                                     <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
                                     <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>

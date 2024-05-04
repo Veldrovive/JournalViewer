@@ -5,6 +5,8 @@ import { OutputFilter, OutputEntry, LocationFilter } from "../interfaces/entryAp
 interface UseEntries {
     setStartTime: (startTime: number) => void
     setEndTime: (endTime: number) => void
+    startTime: number
+    endTime: number
     setEntryTypeWhitelist: (entryTypeWhitelist: string[] | null) => void
     setLocationFilter: (locationFilter: LocationFilter | null) => void
     entries: OutputEntry[] | null
@@ -64,6 +66,8 @@ export function useEntries(apiRoot: string): UseEntries {
     return {
         setStartTime,
         setEndTime,
+        startTime,
+        endTime,
         setEntryTypeWhitelist,
         setLocationFilter,
         entries,
