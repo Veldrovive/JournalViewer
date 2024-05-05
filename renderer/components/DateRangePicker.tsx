@@ -93,8 +93,7 @@ const DateRangePicker = ({ onDateRangeChange, pickerType = PickerType.DAY, start
                 label="Pick dates range"
                 value={value}
                 onChange={setValue}
-                // mx="auto"
-                maw={400}
+                style={{ width: '100%' }}
             />
         } else if (pickerType === PickerType.MONTH) {
             return <MonthPickerInput
@@ -103,8 +102,7 @@ const DateRangePicker = ({ onDateRangeChange, pickerType = PickerType.DAY, start
                 label="Pick dates range"
                 value={value}
                 onChange={handleMonthChange}
-                // mx="auto"
-                maw={400}
+                style={{ width: '100%' }}
             />
         } else if (pickerType === PickerType.YEAR) {
             return <YearPickerInput
@@ -113,8 +111,7 @@ const DateRangePicker = ({ onDateRangeChange, pickerType = PickerType.DAY, start
                 label="Pick dates range"
                 value={value}
                 onChange={handleYearChange}
-                // mx="auto"
-                maw={400}
+                style={{ width: '100%' }}
             />
         } else {
             throw new Error("Invalid picker type")

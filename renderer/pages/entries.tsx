@@ -3,7 +3,8 @@ import Head from 'next/head'
 
 import { useHotkeys, useDisclosure } from "@mantine/hooks"
 import { useSearchParams } from 'next/navigation'
-import { Flex, Grid, Skeleton, Paper, Button, Modal } from "@mantine/core"
+import { Flex, Grid, Skeleton, Paper, Button, Modal, ActionIcon } from "@mantine/core"
+import { IconFilterHeart } from "@tabler/icons-react"
 
 import HerosJourneyMap, { HerosJourneyRef } from "../components/HerosJourneyMap"
 import DateRangePicker, { PickerType } from "../components/DateRangePicker"
@@ -439,12 +440,17 @@ export default function EntriesPage() {
                                 }}
                             >
                                 <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} startTime={startTime} endTime={endTime} />
-                                <Button.Group>
-                                    <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
-                                    <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
-                                    <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
-                                </Button.Group>
-                                <Button onClick={openFilterPicker}>Filter Picker</Button>
+                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                    <Button.Group>
+                                        <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
+                                        <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
+                                        <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
+                                    </Button.Group>
+                                    <ActionIcon>
+                                        <IconFilterHeart onClick={openFilterPicker} />
+                                    </ActionIcon>
+                                </div>
+                                {/* <Button onClick={openFilterPicker}>Filter Picker</Button> */}
                             </div>
                         </div>
                         {
