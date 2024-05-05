@@ -9,12 +9,13 @@ interface UseEntries {
     endTime: number
     setEntryTypeWhitelist: (entryTypeWhitelist: string[] | null) => void
     setLocationFilter: (locationFilter: LocationFilter | null) => void
+    setFullFilter: (filter: OutputFilter) => void
     entries: OutputEntry[] | null
     error: string | null
     loading: boolean
 }
 
-export function useEntries(apiRoot: string): UseEntries {
+export function useEntries(apiRoot: string, onFilterChange: (filter: OutputFilter) => void): UseEntries {
     // Set up the parameters that are used to request entries from the API
     const [startTime, setStartTime] = useState<number>(-1)
     const [endTime, setEndTime] = useState<number>(-1)
@@ -35,6 +36,16 @@ export function useEntries(apiRoot: string): UseEntries {
         [startTime, endTime, entryTypeWhitelist, locationFilter]
     )
 
+    const setFullFilter = useCallback(
+        (filter: OutputFilter) => {
+            setStartTime(filter.timestampAfter || -1)
+            setEndTime(filter.timestampBefore || -1)
+            setEntryTypeWhitelist(filter.entryTypes || null)
+            setLocationFilter(filter.location || null)
+        },
+        [setStartTime, setEndTime, setEntryTypeWhitelist, setLocationFilter]
+    )
+
     // Set up the state that will be returned to the caller
     const [entries, setEntries] = useState<OutputEntry[] | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -46,6 +57,7 @@ export function useEntries(apiRoot: string): UseEntries {
             if (hasValidParameters && apiRoot) {
                 console.log("Fetching entries")
                 setLoading(true)
+                onFilterChange(filterObject)
                 const newEntries = await fetchEntries(apiRoot, filterObject)
                 setLoading(false)
                 // console.log("Fetch complete", newEntries)
@@ -61,7 +73,7 @@ export function useEntries(apiRoot: string): UseEntries {
         }
 
         updateEntries()
-    }, [hasValidParameters, startTime, endTime, entryTypeWhitelist, apiRoot, filterObject, setLoading])
+    }, [hasValidParameters, startTime, endTime, entryTypeWhitelist, apiRoot, filterObject, setLoading, onFilterChange])
 
     return {
         setStartTime,
@@ -70,6 +82,7 @@ export function useEntries(apiRoot: string): UseEntries {
         endTime,
         setEntryTypeWhitelist,
         setLocationFilter,
+        setFullFilter,
         entries,
         error,
         loading,

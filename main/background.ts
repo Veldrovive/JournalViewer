@@ -3,6 +3,8 @@ import { app, ipcMain, BrowserWindow, screen } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 
+import './helpers/storage'
+
 import bonjour from 'bonjour'
 
 // Load environment variables

@@ -3,8 +3,7 @@ import Head from 'next/head'
 
 import { useHotkeys, useDisclosure } from "@mantine/hooks"
 import { useSearchParams } from 'next/navigation'
-import { Flex, Grid, Skeleton, Paper, Button, Modal, Group } from "@mantine/core"
-import { IconSettings } from '@tabler/icons-react';
+import { Flex, Grid, Skeleton, Paper, Button, Modal } from "@mantine/core"
 
 import HerosJourneyMap, { HerosJourneyRef } from "../components/HerosJourneyMap"
 import DateRangePicker, { PickerType } from "../components/DateRangePicker"
@@ -12,16 +11,17 @@ import EntriesList, { ScrollElementValue, EntriesListRef } from "../components/E
 import Clock from "../components/Clock"
 import Providers from "../components/Providers"
 import Config from "../components/Config"
+import FilterPicker from "../components/FilterPicker"
 
 import { useClickAndDrag } from "../hooks/useClickAndDrag"
 import useJournalServer from '../hooks/useJournalServer'
 import { useEntries } from '../hooks/useEntries'
 import { GeoLocation, useProcessedEntries } from '../hooks/useProcessedEntries'
+import usePersistentFilters from "../hooks/usePersistentFilters"
 
 import { TriggerLineType } from "../components/ScrollList"
 
 import style from "../styles/entries.module.scss"
-import { OutputEntry } from "../interfaces/entryApiInterfaces"
 
 const ENTRY_DISPLAY_TYPE_WHITELIST = ["text", "generic_file", "image_file", "video_file", "audio_file", "pdf_file", "fitbit_activity"]
 const ENTRY_DISPLAY_WIDTH = 50
@@ -32,6 +32,7 @@ interface ScrollElementMetadata {
 }
 
 export default function EntriesPage() {
+    const { favoriteFilters, orderedFilters, addFilterSimple, removeFilter, favoriteFilter, unfavoriteFilter, renameFilter } = usePersistentFilters()
     const { journalServiceBaseUrl, journalServiceAlive, inputHandlerInfo, refreshInputHandlerInfo } = useJournalServer()
     const {
         setStartTime,
@@ -40,10 +41,11 @@ export default function EntriesPage() {
         endTime,
         setEntryTypeWhitelist,
         setLocationFilter: _setLocationFilter,
+        setFullFilter,
         entries,
         error: entryFetchError,
         loading: entriesLoading,
-    } = useEntries(journalServiceBaseUrl)
+    } = useEntries(journalServiceBaseUrl, addFilterSimple)
     const { locations, splitLocations, geotaggedEntries, geotaggedEntriesTweens } = useProcessedEntries(entries, {
         entryTypeWhitelist: ENTRY_DISPLAY_TYPE_WHITELIST,
         splitLocationsDistanceThreshold: 5000,
@@ -301,6 +303,23 @@ export default function EntriesPage() {
         [geotaggedEntries]
     )
 
+    const [filterPickerOpened, { open: openFilterPicker, close: closeFilterPicker }] = useDisclosure(false);
+    const filterPicker = useMemo(() => {
+        return (
+            <FilterPicker
+                orderedFilters={orderedFilters}
+                favoriteFilters={favoriteFilters}
+                favoriteFilter={favoriteFilter}
+                unfavoriteFilter={unfavoriteFilter}
+                removeFilter={removeFilter}
+                renameFilter={renameFilter}
+                onFilterSelected={(filter) => {
+                    setFullFilter(filter.filter)
+                }}
+            />
+        )
+    }, [orderedFilters, favoriteFilters, favoriteFilter, unfavoriteFilter, removeFilter, renameFilter, setFullFilter])
+
     const entriesComponent = useMemo(() => {
         if (entryFetchError) {
             return (
@@ -369,6 +388,9 @@ export default function EntriesPage() {
                 <Modal opened={settingsOpen} onClose={closeSettings} title="Configuration">
                     <Config inputHandlerInfo={inputHandlerInfo} refreshInputHandlerInfo={refreshInputHandlerInfo} apiRoot={journalServiceBaseUrl} apiAlive={journalServiceAlive} />
                 </Modal>
+                <Modal opened={filterPickerOpened} onClose={closeFilterPicker} title="Filter Picker">
+                    { filterPicker }
+                </Modal>
                 <Grid className={style["main-grid"]} columns={100}>
                     <Grid.Col span={5} className={`${style["main-grid__item"]} ${style["clock-container"]}`}>
                         <Clock
@@ -419,6 +441,7 @@ export default function EntriesPage() {
                                     <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
                                     <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
                                 </Button.Group>
+                                <Button onClick={openFilterPicker}>Filter Picker</Button>
                             </div>
                         </div>
                         {
