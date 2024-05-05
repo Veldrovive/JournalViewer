@@ -25,6 +25,7 @@
     "electron-store": "^8.2.0",
     "react-markdown": "^9.0.1",
     "react-pdf": "^7.7.1",
+    "react-zoom-pan-pinch": "^3.4.4",
     "sass": "^1.75.0",
     "snakecase-keys": "^8.0.0",
     "throttle-debounce": "^5.0.0"
