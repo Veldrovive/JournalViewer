@@ -316,6 +316,7 @@ export default function EntriesPage() {
                 onFilterSelected={(filter) => {
                     setFullFilter(filter.filter)
                 }}
+                onCloseFilterPicker={closeFilterPicker}
             />
         )
     }, [orderedFilters, favoriteFilters, favoriteFilter, unfavoriteFilter, removeFilter, renameFilter, setFullFilter])

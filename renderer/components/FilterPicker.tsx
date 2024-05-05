@@ -16,7 +16,6 @@ const getDayString = (timestamp: number) => {
     return `${month} ${day}, ${year}`
 }
 
-// Compose AccordianControlProps with onFilterSelected, setFavorite, setName, deleteFilter, and filter
 type ComposedAccordionControlProps = AccordionControlProps & {
     onFilterSelected: (filter: Filter) => void;
     setFavorite: (isFavorite: boolean) => void;
@@ -111,7 +110,8 @@ export default function FilterPicker({
     favoriteFilter,
     unfavoriteFilter,
     renameFilter,
-    onFilterSelected
+    onFilterSelected,
+    onCloseFilterPicker
 }: {
     favoriteFilters: Filter[],
     orderedFilters: Filter[],
@@ -120,7 +120,13 @@ export default function FilterPicker({
     unfavoriteFilter: (id: string) => void,
     renameFilter: (id: string, name: string) => void,
     onFilterSelected: (filter: Filter) => void
+    onCloseFilterPicker: () => void
 }) {
+    const _onFilterSelected = useCallback((filter: Filter) => {
+        onFilterSelected(filter)
+        onCloseFilterPicker()
+    }, [onFilterSelected, onCloseFilterPicker])
+
     const setFavorite = useCallback((id: string, isFavorite: boolean) => {
         if (isFavorite) {
             favoriteFilter(id)
@@ -135,13 +141,13 @@ export default function FilterPicker({
             return <FilterElem
                 key={filter.id}
                 filter={filter}
-                onFilterSelected={onFilterSelected}
+                onFilterSelected={_onFilterSelected}
                 setFavorite={isFavorite => setFavorite(filter.id, isFavorite)}
                 setName={name => renameFilter(filter.id, name)}
                 deleteFilter={() => removeFilter(filter.id)}
             />
         })
-    }, [favoriteFilters, onFilterSelected])
+    }, [favoriteFilters, _onFilterSelected])
 
     const [expandedOrdered, setExpandedOrdered] = useState<string | null>(null)
     const orderedFiltersElems = useMemo(() => {
@@ -149,13 +155,13 @@ export default function FilterPicker({
             return <FilterElem
                 key={filter.id}
                 filter={filter}
-                onFilterSelected={onFilterSelected}
+                onFilterSelected={_onFilterSelected}
                 setFavorite={isFavorite => setFavorite(filter.id, isFavorite)}
                 setName={name => renameFilter(filter.id, name)}
                 deleteFilter={() => removeFilter(filter.id)}
             />
         })
-    }, [orderedFilters, onFilterSelected])
+    }, [orderedFilters, _onFilterSelected])
 
     return <div>
         <h3>Favorites</h3>
