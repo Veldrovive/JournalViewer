@@ -26,6 +26,7 @@ export async function fetchEntries(apiRoot: string, filter: OutputFilter): Promi
         for (const entryType of filter.entryTypes) {
             params.append("type_whitelist", entryType)
         }
+        params.append("type_whitelist", "geolocation")
     }
 
     if (filter.inputHandlerIds) {

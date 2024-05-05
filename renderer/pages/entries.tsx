@@ -32,7 +32,7 @@ interface ScrollElementMetadata {
 }
 
 export default function EntriesPage() {
-    const { favoriteFilters, orderedFilters, addFilterSimple, removeFilter, favoriteFilter, unfavoriteFilter, renameFilter } = usePersistentFilters()
+    const { favoriteFilters, orderedFilters, addFilterSimple, removeFilter, favoriteFilter, unfavoriteFilter, renameFilter, setFilterEntryTypes } = usePersistentFilters()
     const { journalServiceBaseUrl, journalServiceAlive, inputHandlerInfo, refreshInputHandlerInfo } = useJournalServer()
     const {
         setStartTime,
@@ -76,7 +76,7 @@ export default function EntriesPage() {
     }, [journalServiceAlive])
 
     useEffect(() => {
-        const entryTypeWhitelist = [...ENTRY_DISPLAY_TYPE_WHITELIST, 'geolocation']
+        const entryTypeWhitelist = ENTRY_DISPLAY_TYPE_WHITELIST
         setEntryTypeWhitelist(entryTypeWhitelist)
     }, [setEntryTypeWhitelist])
 
@@ -313,10 +313,12 @@ export default function EntriesPage() {
                 unfavoriteFilter={unfavoriteFilter}
                 removeFilter={removeFilter}
                 renameFilter={renameFilter}
+                setEntryTypes={setFilterEntryTypes}
                 onFilterSelected={(filter) => {
                     setFullFilter(filter.filter)
                 }}
                 onCloseFilterPicker={closeFilterPicker}
+                allowedEntryTypes={ENTRY_DISPLAY_TYPE_WHITELIST}
             />
         )
     }, [orderedFilters, favoriteFilters, favoriteFilter, unfavoriteFilter, removeFilter, renameFilter, setFullFilter])

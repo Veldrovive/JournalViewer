@@ -1,7 +1,9 @@
 import { app, ipcMain } from 'electron'
 import fs from 'fs'
 
-const savePath = `${app.getPath('userData')}/storage`
+const isProd = process.env.NODE_ENV === 'production'
+
+const savePath = `${app.getPath('userData')}/storage/${isProd ? 'prod' : 'dev'}`
 // Create the storage dir if it doesn't exist
 if (!fs.existsSync(savePath)) {
     fs.mkdirSync(savePath)

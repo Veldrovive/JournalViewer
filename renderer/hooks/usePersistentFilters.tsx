@@ -143,6 +143,22 @@ export default function usePersistentFilters() {
         })
     }, [setFilters])
 
+    const setFilterEntryTypes = useCallback((id: string, entryTypes: string[]) => {
+        console.log('Setting entry types', id, entryTypes)
+        setFilters(filters => {
+            return {
+                ...filters,
+                [id]: {
+                    ...filters[id],
+                    filter: {
+                        ...filters[id].filter,
+                        entryTypes
+                    }
+                }
+            }
+        })
+    }, [setFilters])
+
     const favoriteFilters = useMemo(() => {
         return Object.values(filters).filter(f => f.isFavorite).sort((a, b) => b.addedTime - a.addedTime)
     }, [filters])
@@ -151,5 +167,5 @@ export default function usePersistentFilters() {
         return Object.values(filters).sort((a, b) => b.addedTime - a.addedTime)
     }, [filters])
 
-    return { addFilter, addFilterSimple, removeFilter, favoriteFilter, unfavoriteFilter, renameFilter, addTag, removeTag, favoriteFilters, orderedFilters }
+    return { addFilter, addFilterSimple, removeFilter, favoriteFilter, unfavoriteFilter, renameFilter, addTag, removeTag, setFilterEntryTypes, favoriteFilters, orderedFilters }
 }

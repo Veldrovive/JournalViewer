@@ -1,9 +1,8 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Filter } from "../hooks/usePersistentFilters"
-import { OutputFilter } from "../interfaces/entryApiInterfaces"
 
-import { Button, Divider } from "@mantine/core"
-import { Accordion, AccordionControlProps, Box, ActionIcon, Flex, TextInput } from '@mantine/core'
+import { Divider } from "@mantine/core"
+import { Accordion, AccordionControlProps, Box, ActionIcon, Flex, TextInput, MultiSelect } from '@mantine/core'
 import { IconHeart, IconHeartFilled, IconTrash, IconSelect } from "@tabler/icons-react"
 
 const getDayString = (timestamp: number) => {
@@ -17,11 +16,11 @@ const getDayString = (timestamp: number) => {
 }
 
 type ComposedAccordionControlProps = AccordionControlProps & {
-    onFilterSelected: (filter: Filter) => void;
-    setFavorite: (isFavorite: boolean) => void;
-    setName: (name: string) => void;
-    deleteFilter: () => void;
-    filter: Filter;
+    onFilterSelected: (filter: Filter) => void
+    setFavorite: (isFavorite: boolean) => void
+    setName: (name: string) => void
+    deleteFilter: () => void
+    filter: Filter
 };
 
 function AccordionControl({
@@ -33,34 +32,55 @@ function AccordionControl({
     ...props
 }: ComposedAccordionControlProps) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Accordion.Control {...props} />
-        <ActionIcon size="lg" onClick={() => onFilterSelected(filter)}>
-            <IconSelect />
-        </ActionIcon>
-        <ActionIcon size="lg" onClick={deleteFilter}>
-            <IconTrash />
-        </ActionIcon>
-        <ActionIcon size="lg" onClick={() => setFavorite(!filter.isFavorite)}>
-          {filter.isFavorite ? <IconHeartFilled /> : <IconHeart />}
-        </ActionIcon>
-      </Box>
-    );
-  }
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Accordion.Control {...props} />
+            <ActionIcon size="lg" onClick={() => onFilterSelected(filter)}>
+                <IconSelect />
+            </ActionIcon>
+            <ActionIcon size="lg" onClick={deleteFilter}>
+                <IconTrash />
+            </ActionIcon>
+            <ActionIcon size="lg" onClick={() => setFavorite(!filter.isFavorite)}>
+                {filter.isFavorite ? <IconHeartFilled /> : <IconHeart />}
+            </ActionIcon>
+        </Box>
+    )
+}
+
+const entryTypeNameMap = {
+    'text': 'Text',
+    'generic_file': 'File',
+    'image_file': 'Image',
+    'video_file': 'Video',
+    'audio_file': 'Audio',
+    'pdf_file': 'PDF',
+    'fitbit_activity': 'Fitbit Activity'
+}
 
 function FilterElem({
     filter,
     onFilterSelected,
     setFavorite,
     setName,
+    setEntryTypes,
     deleteFilter,
+    allowedEntryTypes
 }: {
     filter: Filter,
     onFilterSelected: (filter: Filter) => void
     setFavorite: (isFavorite: boolean) => void
     setName: (name: string) => void
+    setEntryTypes: (entryTypes: string[]) => void
     deleteFilter: () => void
+    allowedEntryTypes: string[]
 }) {
+    const data = useMemo(() => {
+        return allowedEntryTypes.map(entryType => {
+            return { value: entryType, label: entryTypeNameMap[entryType]}
+        })
+
+    }, [allowedEntryTypes])
+
     const displayName = useMemo(() => {
         if (filter.name) {
             return filter.name
@@ -77,10 +97,6 @@ function FilterElem({
 
     }, [filter])
 
-    const onFavorite = useCallback(() => {
-        setFavorite(!filter.isFavorite)
-    }, [filter])
-
     return <Accordion.Item value={filter.id}>
         <AccordionControl
             onFilterSelected={onFilterSelected}
@@ -90,14 +106,18 @@ function FilterElem({
             filter={filter}
         >{ displayName }</AccordionControl>
         <Accordion.Panel>
-            <Flex direction="column" align="center" w='100%'>
-                <Flex w='100%'>
-                    <TextInput
-                        label="Name"
-                        value={filter.name || ''}
-                        onChange={(e) => setName(e.currentTarget.value)}
-                    />
-                </Flex>
+            <Flex direction="column" align="flex-start" w='100%'>
+                <TextInput
+                    label="Name"
+                    value={filter.name || ''}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                />
+                <MultiSelect
+                    label="Entry Types"
+                    data={data}
+                    value={filter.filter.entryTypes || []}
+                    onChange={setEntryTypes}
+                />
             </Flex>
         </Accordion.Panel>
     </Accordion.Item>
@@ -110,8 +130,10 @@ export default function FilterPicker({
     favoriteFilter,
     unfavoriteFilter,
     renameFilter,
+    setEntryTypes,
     onFilterSelected,
-    onCloseFilterPicker
+    onCloseFilterPicker,
+    allowedEntryTypes
 }: {
     favoriteFilters: Filter[],
     orderedFilters: Filter[],
@@ -119,8 +141,10 @@ export default function FilterPicker({
     favoriteFilter: (id: string) => void,
     unfavoriteFilter: (id: string) => void,
     renameFilter: (id: string, name: string) => void,
-    onFilterSelected: (filter: Filter) => void
-    onCloseFilterPicker: () => void
+    setEntryTypes: (id: string, entryTypes: string[]) => void,
+    onFilterSelected: (filter: Filter) => void,
+    onCloseFilterPicker: () => void,
+    allowedEntryTypes: string[]
 }) {
     const _onFilterSelected = useCallback((filter: Filter) => {
         onFilterSelected(filter)
@@ -144,7 +168,9 @@ export default function FilterPicker({
                 onFilterSelected={_onFilterSelected}
                 setFavorite={isFavorite => setFavorite(filter.id, isFavorite)}
                 setName={name => renameFilter(filter.id, name)}
+                setEntryTypes={entryTypes => setEntryTypes(filter.id, entryTypes)}
                 deleteFilter={() => removeFilter(filter.id)}
+                allowedEntryTypes={allowedEntryTypes}
             />
         })
     }, [favoriteFilters, _onFilterSelected])
@@ -158,7 +184,9 @@ export default function FilterPicker({
                 onFilterSelected={_onFilterSelected}
                 setFavorite={isFavorite => setFavorite(filter.id, isFavorite)}
                 setName={name => renameFilter(filter.id, name)}
+                setEntryTypes={entryTypes => setEntryTypes(filter.id, entryTypes)}
                 deleteFilter={() => removeFilter(filter.id)}
+                allowedEntryTypes={allowedEntryTypes}
             />
         })
     }, [orderedFilters, _onFilterSelected])
