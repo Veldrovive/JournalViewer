@@ -3,8 +3,8 @@ import { Filter } from "../hooks/usePersistentFilters"
 import { OutputFilter } from "../interfaces/entryApiInterfaces"
 
 import { Button, Divider } from "@mantine/core"
-import { Accordion, ActionIcon, Flex, TextInput } from '@mantine/core'
-import { IconHeart, IconHeartFilled } from "@tabler/icons-react"
+import { Accordion, AccordionControlProps, Box, ActionIcon, Flex, TextInput } from '@mantine/core'
+import { IconHeart, IconHeartFilled, IconTrash, IconSelect } from "@tabler/icons-react"
 
 const getDayString = (timestamp: number) => {
     // Converts from a timestamp to a string like "April 2nd, 2021"
@@ -15,6 +15,39 @@ const getDayString = (timestamp: number) => {
 
     return `${month} ${day}, ${year}`
 }
+
+// Compose AccordianControlProps with onFilterSelected, setFavorite, setName, deleteFilter, and filter
+type ComposedAccordionControlProps = AccordionControlProps & {
+    onFilterSelected: (filter: Filter) => void;
+    setFavorite: (isFavorite: boolean) => void;
+    setName: (name: string) => void;
+    deleteFilter: () => void;
+    filter: Filter;
+};
+
+function AccordionControl({
+    onFilterSelected,
+    setFavorite,
+    setName,
+    deleteFilter,
+    filter,
+    ...props
+}: ComposedAccordionControlProps) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Accordion.Control {...props} />
+        <ActionIcon size="lg" onClick={() => onFilterSelected(filter)}>
+            <IconSelect />
+        </ActionIcon>
+        <ActionIcon size="lg" onClick={deleteFilter}>
+            <IconTrash />
+        </ActionIcon>
+        <ActionIcon size="lg" onClick={() => setFavorite(!filter.isFavorite)}>
+          {filter.isFavorite ? <IconHeartFilled /> : <IconHeart />}
+        </ActionIcon>
+      </Box>
+    );
+  }
 
 function FilterElem({
     filter,
@@ -50,14 +83,15 @@ function FilterElem({
     }, [filter])
 
     return <Accordion.Item value={filter.id}>
-        <Accordion.Control>{ displayName }</Accordion.Control>
+        <AccordionControl
+            onFilterSelected={onFilterSelected}
+            setFavorite={setFavorite}
+            setName={setName}
+            deleteFilter={deleteFilter}
+            filter={filter}
+        >{ displayName }</AccordionControl>
         <Accordion.Panel>
             <Flex direction="column" align="center" w='100%'>
-                <Flex direction="row" justify="center">
-                    <Button onClick={() => onFilterSelected(filter)}>Activate</Button>
-                    <Button ml="lg" onClick={deleteFilter}>Delete</Button>
-                    <Button ml="lg" onClick={onFavorite}>{ filter.isFavorite ? 'Unfavorite' : 'Favorite' }</Button>
-                </Flex>
                 <Flex w='100%'>
                     <TextInput
                         label="Name"
@@ -111,7 +145,7 @@ export default function FilterPicker({
 
     const [expandedOrdered, setExpandedOrdered] = useState<string | null>(null)
     const orderedFiltersElems = useMemo(() => {
-        return orderedFilters.map(filter => {
+        return orderedFilters.filter(filter => !filter.isFavorite).map(filter => {
             return <FilterElem
                 key={filter.id}
                 filter={filter}
@@ -125,12 +159,11 @@ export default function FilterPicker({
 
     return <div>
         <h3>Favorites</h3>
-        <Accordion value={expandedFavorite} onChange={setExpandedFavorite}>
+        <Accordion value={expandedFavorite} onChange={setExpandedFavorite} chevronPosition="left">
             {favoriteFiltersElems}
         </Accordion>
         <Divider />
-        <h3>All</h3>
-        <Accordion value={expandedOrdered} onChange={setExpandedOrdered}>
+        <Accordion value={expandedOrdered} onChange={setExpandedOrdered} chevronPosition="left">
             {orderedFiltersElems}
         </Accordion>
     </div>
