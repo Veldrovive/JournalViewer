@@ -6,6 +6,8 @@ import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import 'katex/dist/katex.min.css' // `rehype-katex` does not import the CSS for you
 
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+
 export type TextEntryData = string
 
 interface TextEntryProps {
@@ -15,7 +17,29 @@ interface TextEntryProps {
 const TextEntry = ({ entry }: TextEntryProps) => {
     return (
         <div>
-            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{entry.data}</ReactMarkdown>
+            <ReactMarkdown
+                children={entry.data}
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                    code(props) {
+                        const {children, className, node, ...rest} = props
+                        const match = /language-(\w+)/.exec(className || '')
+                        return match ? (
+                            <SyntaxHighlighter
+                                {...rest}
+                                PreTag="div"
+                                children={String(children).replace(/\n$/, '')}
+                                language={match[1]}
+                            />
+                        ) : (
+                            <code {...rest} className={className}>
+                                {children}
+                            </code>
+                        )
+                    }
+                }}
+            />
         </div>
     )
 }
