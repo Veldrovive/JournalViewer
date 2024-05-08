@@ -10,7 +10,6 @@ import HerosJourneyMap, { HerosJourneyRef } from "../components/HerosJourneyMap"
 import DateRangePicker, { PickerType } from "../components/DateRangePicker"
 import EntriesList, { ScrollElementValue, EntriesListRef } from "../components/EntriesList"
 import Clock from "../components/Clock"
-import Providers from "../components/Providers"
 import Config from "../components/Config"
 import FilterPicker from "../components/FilterPicker"
 
@@ -388,89 +387,87 @@ export default function EntriesPage() {
             <Head>
                 <title>Journal Entries</title>
             </Head>
-            <Providers>
-                <Modal opened={settingsOpen} onClose={closeSettings} title="Configuration">
-                    <Config inputHandlerInfo={inputHandlerInfo} refreshInputHandlerInfo={refreshInputHandlerInfo} apiRoot={journalServiceBaseUrl} apiAlive={journalServiceAlive} />
-                </Modal>
-                <Modal opened={filterPickerOpened} onClose={closeFilterPicker} title="Filter Picker">
-                    { filterPicker }
-                </Modal>
-                <Grid className={style["main-grid"]} columns={100}>
-                    <Grid.Col span={5} className={`${style["main-grid__item"]} ${style["clock-container"]}`}>
-                        <Clock
-                            time={currentTime}
-                            twentyFourHour={false}
-                            displayAmPm={true}
-                            zeroPad={false}
-                            displayCurrentTime={true}
-                            displayDate={displayClockDate}
-                            markers={clockMarkers}
-                            onMarkerClick={onClockMarkerClick}
-                        ></Clock>
-                    </Grid.Col>
-                    <Grid.Col span={entriesListWidth} className={`${style["main-grid__item"]} ${style["entries-container"]}`}>
-                        <Flex direction="row" h="100%">
-                            <div style={{ position: "relative", width: "calc(100% - 13px)" }}>
-                                <Paper w="100%" h="100%" pos="relative" shadow="sm" px="xs">
-                                    {entriesComponent}
-                                </Paper>
-                            </div>
-                            <div className={style["entries-drag-indicator"]} ref={ref}>
-                                <div className={style["drag-handle"]}></div>
-                            </div>
-                        </Flex>
-                    </Grid.Col>
-                    <Grid.Col
-                        span={100 - entriesListWidth - 5}
-                        className={`${style["main-grid__item"]} ${style["map-container"]}`}
-                    >
-                        <div className={style["date-picker-positioner"]}>
-                            <div
-                                style={{
-                                    padding: "10px",
-                                    backgroundColor: "white",
-                                    margin: "5px",
-                                    borderRadius: "10px",
-                                    minWidth: "50%",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    pointerEvents: "auto",
-                                }}
-                            >
-                                <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} startTime={startTime} endTime={endTime} />
-                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                                    <Button.Group>
-                                        <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
-                                        <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
-                                        <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
-                                    </Button.Group>
-                                    <ActionIcon>
-                                        <IconFilterHeart onClick={openFilterPicker} />
-                                    </ActionIcon>
-                                </div>
-                                {/* <Button onClick={openFilterPicker}>Filter Picker</Button> */}
-                            </div>
+            <Modal opened={settingsOpen} onClose={closeSettings} title="Configuration">
+                <Config inputHandlerInfo={inputHandlerInfo} refreshInputHandlerInfo={refreshInputHandlerInfo} apiRoot={journalServiceBaseUrl} apiAlive={journalServiceAlive} />
+            </Modal>
+            <Modal opened={filterPickerOpened} onClose={closeFilterPicker} title="Filter Picker">
+                { filterPicker }
+            </Modal>
+            <Grid className={style["main-grid"]} columns={100}>
+                <Grid.Col span={5} className={`${style["main-grid__item"]} ${style["clock-container"]}`}>
+                    <Clock
+                        time={currentTime}
+                        twentyFourHour={false}
+                        displayAmPm={true}
+                        zeroPad={false}
+                        displayCurrentTime={true}
+                        displayDate={displayClockDate}
+                        markers={clockMarkers}
+                        onMarkerClick={onClockMarkerClick}
+                    ></Clock>
+                </Grid.Col>
+                <Grid.Col span={entriesListWidth} className={`${style["main-grid__item"]} ${style["entries-container"]}`}>
+                    <Flex direction="row" h="100%">
+                        <div style={{ position: "relative", width: "calc(100% - 13px)" }}>
+                            <Paper w="100%" h="100%" pos="relative" shadow="sm" px="xs">
+                                {entriesComponent}
+                            </Paper>
                         </div>
-                        {
-                            googleApiKey && <HerosJourneyMap
-                                googleApiKey={googleApiKey}
-                                splitLocations={splitLocations}
-                                geotaggedEntries={geotaggedEntries}
-                                currentLocation={currentLocation}
+                        <div className={style["entries-drag-indicator"]} ref={ref}>
+                            <div className={style["drag-handle"]}></div>
+                        </div>
+                    </Flex>
+                </Grid.Col>
+                <Grid.Col
+                    span={100 - entriesListWidth - 5}
+                    className={`${style["main-grid__item"]} ${style["map-container"]}`}
+                >
+                    <div className={style["date-picker-positioner"]}>
+                        <div
+                            style={{
+                                padding: "10px",
+                                backgroundColor: "white",
+                                margin: "5px",
+                                borderRadius: "10px",
+                                minWidth: "50%",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                pointerEvents: "auto",
+                            }}
+                        >
+                            <DateRangePicker onDateRangeChange={onDateRangeChange} pickerType={datePickerType} startTime={startTime} endTime={endTime} />
+                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                <Button.Group>
+                                    <Button compact variant={datePickerType === PickerType.DAY ? "light" : "default"} onClick={() => setDatePickerType(PickerType.DAY)}>Day</Button>
+                                    <Button compact variant={datePickerType === PickerType.MONTH ? "light" : "default"} onClick={() => setDatePickerType(PickerType.MONTH)}>Month</Button>
+                                    <Button compact variant={datePickerType === PickerType.YEAR ? "light" : "default"} onClick={() => setDatePickerType(PickerType.YEAR)}>Year</Button>
+                                </Button.Group>
+                                <ActionIcon>
+                                    <IconFilterHeart onClick={openFilterPicker} />
+                                </ActionIcon>
+                            </div>
+                            {/* <Button onClick={openFilterPicker}>Filter Picker</Button> */}
+                        </div>
+                    </div>
+                    {
+                        googleApiKey && <HerosJourneyMap
+                            googleApiKey={googleApiKey}
+                            splitLocations={splitLocations}
+                            geotaggedEntries={geotaggedEntries}
+                            currentLocation={currentLocation}
 
-                                onGeotaggedEntryClick={onGeotaggedEntryClick}
-                                onGeolocationClick={onGeolocationClick}
-                                onAreaSelect={setLocationFilter}
-                                onConfigButtonPressed={openSettings}
+                            onGeotaggedEntryClick={onGeotaggedEntryClick}
+                            onGeolocationClick={onGeolocationClick}
+                            onAreaSelect={setLocationFilter}
+                            onConfigButtonPressed={openSettings}
 
-                                ref={mapRef}
-                            ></HerosJourneyMap>
-                        }
-                    </Grid.Col>
-                </Grid>
-            </Providers>
+                            ref={mapRef}
+                        ></HerosJourneyMap>
+                    }
+                </Grid.Col>
+            </Grid>
         </>
     )
 }

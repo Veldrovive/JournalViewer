@@ -27,7 +27,6 @@ const TextEntry = ({ entry }: TextEntryProps) => {
                         const match = /language-(\w+)/.exec(className || '')
                         return match ? (
                             <SyntaxHighlighter
-                                {...rest}
                                 PreTag="div"
                                 children={String(children).replace(/\n$/, '')}
                                 language={match[1]}

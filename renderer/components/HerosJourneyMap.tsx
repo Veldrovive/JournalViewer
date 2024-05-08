@@ -89,7 +89,7 @@ export default forwardRef(function HerosJourneyMap(
     useEffect(() => {
         if (map) {
             // Set gesture handling to auto
-            map.setOptions({ gestureHandling: "auto" })
+            map.setOptions({ gestureHandling: "greedy" })
             // Set clickable icons to false
             map.setOptions({ clickableIcons: false })
         }
