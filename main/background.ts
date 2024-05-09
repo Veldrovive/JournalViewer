@@ -1,5 +1,5 @@
 import path from 'path'
-import { app, ipcMain, BrowserWindow, screen } from 'electron'
+import { app, ipcMain, BrowserWindow, screen, shell } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 
@@ -21,69 +21,80 @@ if (isProd) {
 }
 
 ;(async () => {
-  await app.whenReady()
+    await app.whenReady()
 
-  const primaryDisplay = screen.getPrimaryDisplay()
-  const { width, height } = primaryDisplay.workAreaSize
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width, height } = primaryDisplay.workAreaSize
 
-  const mainWindow = createWindow('main', {
-    width, height,
-    fullscreen: true,
-    center: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    },
-  })
+    const mainWindow = createWindow('main', {
+        width, height,
+        fullscreen: true,
+        center: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+        },
+    })
 
-  if (isProd) {
-    await mainWindow.loadURL('app://./home')
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        // config.fileProtocol is my custom file protocol
+        console.log('Window open handler', url)
+        if ('file://' === url.substr(0, 'file://'.length)) {
+            return { action: 'allow' };
+        }
+        // open url in a browser and prevent default
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
 
-    // Listen for http mDNS broadcasts
-    let journalService = null
+    if (isProd) {
+        await mainWindow.loadURL('app://./home')
 
-    const bonjourService = bonjour()
-    const browser = bonjourService.find({ type: 'http' })
+        // Listen for http mDNS broadcasts
+        let journalService = null
 
-    browser.on('up', (service) => {
-      console.log('Found Service', service)
-      if (service.name.toLowerCase().includes('journal server')) {
-        console.log('Found Journal Service', service)
-        journalService = service
+        const bonjourService = bonjour()
+        const browser = bonjourService.find({ type: 'http' })
+
+        browser.on('up', (service) => {
+            console.log('Found Service', service)
+            if (service.name.toLowerCase().includes('journal server')) {
+                console.log('Found Journal Service', service)
+                journalService = service
+                mainWindow.webContents.send('journal_service', journalService)
+            }
+        })
+
+        browser.on('down', (service) => {
+        if (service.name.toLowerCase().includes('journal server')) {
+            journalService = null
+            mainWindow.webContents.send('journal_service', journalService)
+        }
+        })
+
+        ipcMain.on('refresh_services', () => {
         mainWindow.webContents.send('journal_service', journalService)
-      }
-    })
+        })
+    } else {
+        const port = process.argv[2]
+        await mainWindow.loadURL(`http://localhost:${port}/home`)
+        mainWindow.webContents.openDevTools()
 
-    browser.on('down', (service) => {
-      if (service.name.toLowerCase().includes('journal server')) {
-        journalService = null
-        mainWindow.webContents.send('journal_service', journalService)
-      }
-    })
-
-    ipcMain.on('refresh_services', () => {
-      mainWindow.webContents.send('journal_service', journalService)
-    })
-  } else {
-    const port = process.argv[2]
-    await mainWindow.loadURL(`http://localhost:${port}/home`)
-    mainWindow.webContents.openDevTools()
-
-    ipcMain.on('refresh_services', () => {
-      mainWindow.webContents.send('journal_service', {
-        port: devServerPort,
-        addresses: [devServerHost],
-      })
-    })
-  }
+        ipcMain.on('refresh_services', () => {
+            mainWindow.webContents.send('journal_service', {
+                port: devServerPort,
+                addresses: [devServerHost],
+            })
+        })
+    }
 })()
 
 app.on('window-all-closed', () => {
-  app.quit()
+    app.quit()
 })
 
 ipcMain.on('message', async (event, arg) => {
     console.log('Got message', arg)
-  event.reply('message', `${arg} World!`)
+    event.reply('message', `${arg} World!`)
 })
 
 ipcMain.on('google-auth', async (message_event, arg) => {

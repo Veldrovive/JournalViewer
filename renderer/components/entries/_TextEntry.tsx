@@ -36,6 +36,9 @@ const TextEntry = ({ entry }: TextEntryProps) => {
                                 {children}
                             </code>
                         )
+                    },
+                    a(props) {
+                        return <a {...props} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} />
                     }
                 }}
             />
