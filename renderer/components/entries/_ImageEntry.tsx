@@ -27,7 +27,7 @@ const ImageEntry = ({ entry }: ImageEntryProps) => {
             </ActionIcon>
             <Modal.Root opened={opened} onClose={close} size="auto" centered onClick={e => e.stopPropagation()}>
                 <Modal.Overlay opacity={0.7} blur={3} />
-                <Modal.Content>
+                <Modal.Content style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}>
                     <Modal.Body style={{ padding: 0 }}>
                         <ActionIcon style={{ zIndex: 10, position: 'absolute', top: 5, left: 5 }} size="lg" onClick={close}>
                             <IconMaximize />
